@@ -17,3 +17,6 @@ AIRPORT_PASSWORD = '1001'
 
 # 数据库配置
 DB_HOST = 'localhost'
+DB_USER = 'root'
+DB_PASSWORD = 'LFNL'
+DB_NAME = 'Airline_Union'

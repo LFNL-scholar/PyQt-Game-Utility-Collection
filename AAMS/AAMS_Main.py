@@ -2,13 +2,22 @@
 项目名称：Airline Alliance Management System 航空联盟管理系统
 作者：LFNL_Scholar
 时间：2024/6
-代码功能：
+代码功能：主界面和功能的设计与实现
 """
+import os
 import sys
 
-from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QMainWindow, QDesktopWidget
 from PyQt5 import uic
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt, pyqtSignal, QRect
+
+from SQLs import *
+from Airline_Union_db import *
+import Config as C
+
+# 全局变量
+
 
 class MainWindow(QMainWindow):  # 步骤1: 登录成功后的窗口类
     def __init__(self):
@@ -50,3 +59,10 @@ class Purchase(QMainWindow):
             event.accept()
         else:
             event.ignore()
+
+
+def main():
+    print('1')
+
+if __name__ == '__main__':
+    main()

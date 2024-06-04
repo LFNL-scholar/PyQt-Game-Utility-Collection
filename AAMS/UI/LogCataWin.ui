@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>编目系统</string>
+   <string>航空联盟管理系统</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="Line" name="line">
