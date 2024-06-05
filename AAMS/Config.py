@@ -20,3 +20,6 @@ DB_HOST = 'localhost'
 DB_USER = 'root'
 DB_PASSWORD = 'LFNL'
 DB_NAME = 'Airline_Union'
+
+DB_NAME_T = 'TEST_AAMS'
+
