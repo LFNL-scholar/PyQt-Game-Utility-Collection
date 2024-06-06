@@ -198,6 +198,7 @@ class User_MainWindow(QMainWindow):
         # 获取各个 QLabel 对象
         flight_number_label = purchase_page.findChild(QLabel, 'FlightNumberLabel')
         plane_type_label = purchase_page.findChild(QLabel, 'PlaneTypeLabel')
+        departure_date_label = purchase_page.findChild(QLabel, 'DepartureDateLabel')
         departure_time_label = purchase_page.findChild(QLabel, 'DepartureTimeLabel')
         arrival_time_label = purchase_page.findChild(QLabel, 'ArrivalTimeLabel')
         departure_airport_label = purchase_page.findChild(QLabel, 'DepartureAirportLabel')
@@ -209,35 +210,17 @@ class User_MainWindow(QMainWindow):
         (flight_id, departure_place, arrival_place, departure_airport, arrival_airport, departure_date,
          takeoff_time, total_time, plane_type, price) = self.selected_flight
 
-        try:
-
-            # 打印调试信息
-            print(f"Departure date: {departure_date}")
-            print(f"Takeoff time: {takeoff_time}")
-
-            # 确保日期和时间的格式正确
-            if not isinstance(departure_date, str):
-                departure_date = departure_date.strftime("%Y-%m-%d")
-            if not isinstance(takeoff_time, str):
-                takeoff_time = takeoff_time.strftime("%H:%M")
-
-            # 计算到达时间
-            departure_datetime = datetime.strptime(f"{departure_date} {takeoff_time}", "%Y-%m-%d %H:%M")
-            total_minutes = int(total_time)  # 确保 total_time 是一个表示分钟数的整数
-            arrival_datetime = departure_datetime + timedelta(minutes = total_minutes)
-            arrival_time = arrival_datetime.strftime("%Y-%m-%d %H:%M")
-
-        except ValueError as e:
-            QMessageBox.warning(self, 'Error', f"日期或时间格式错误: {e}")
-
         # 设置各个 QLabel 的文本
         flight_number_label.setText(f"{flight_id}")
         plane_type_label.setText(f"{plane_type}")
+        departure_date_label.setText(f"{departure_date}")
         departure_time_label.setText(f"{takeoff_time}")
-        arrival_time_label.setText(f"{total_time}")
+        arrival_time_label.setText(f"{takeoff_time + total_time}")
         departure_airport_label.setText(f"{departure_airport}")
         arrival_airport_label.setText(f"{arrival_airport}")
-        price_label.setText(f"￥{price}")
+        price_label.setText(f"￥ {price}")
+
+
 
     # 我的订单界面
     def ToOrders(self):
