@@ -55,11 +55,15 @@ CREATE TABLE AirportsManagers -- 04 创建机场管理员表
     FOREIGN KEY (Aname) REFERENCES Airports(Aname)
 );
 
-CREATE TABLE Passengers -- 05 创建乘客表
+CREATE TABLE Passengers -- 创建乘客表
 (
-    PSid CHAR(18) PRIMARY KEY, -- 乘客身份证号
+    Order_ID VARCHAR(20),
+    PSid CHAR(18) NOT NULL, -- 乘客身份证号
     Pname VARCHAR(50) NOT NULL, -- 姓名
-    Psex CHAR(1) NOT NULL -- 性别
+    Psex CHAR(1) NOT NULL, -- 性别
+    PRIMARY KEY (Order_ID, PSid),
+    FOREIGN KEY (Order_ID) REFERENCES Orders(OrdersID),
+    UNIQUE KEY (Order_ID, PSid)  -- 为 PSid 创建唯一索引
 );
 
 CREATE TABLE Orders -- 06 创建订单表
@@ -86,7 +90,7 @@ CREATE TABLE Flights -- 07 创建航班表
     Fprice INT -- 航班票价
 );
 
-CREATE TABLE Tickets -- 08 创建机票表
+CREATE TABLE Tickets -- 创建机票表
 (
     FlightsID VARCHAR(20), -- 航班编号
     SeatNum VARCHAR(10), -- 座位号
@@ -95,7 +99,7 @@ CREATE TABLE Tickets -- 08 创建机票表
     TicketPrice DECIMAL(10, 2), -- 机票价格
     PRIMARY KEY (FlightsID, SeatNum),
     FOREIGN KEY (OrdersID) REFERENCES Orders(OrdersID),
-    FOREIGN KEY (PSid) REFERENCES Passengers(PSid)
+    FOREIGN KEY (OrdersID, PSid) REFERENCES Passengers(Order_ID, PSid)
 );
 
 

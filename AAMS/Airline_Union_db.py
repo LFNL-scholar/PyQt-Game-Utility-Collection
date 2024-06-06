@@ -7,6 +7,10 @@
 
 import pymysql
 import hashlib
+
+import random
+import datetime
+
 import Config as C
 
 global conn
@@ -143,6 +147,70 @@ def search_flights(departure_airport, arrival_airport, selected_date):
 
     return sql_execute(sql)
 
+# 0 插入乘客信息函数
+# 0 插入乘客信息函数
+# 插入乘客信息
+# 插入乘客信息
+def insert_passenger(order_id, psid, pname, psex):
+    global conn
+    if conn is None:
+        conn = conn_mysql()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO Passengers (Order_ID, PSid, Pname, Psex) VALUES (%s, %s, %s, %s)",
+            (order_id, psid, pname, psex)
+        )
+        conn.commit()
+    except Exception as e:
+        conn.rollback()  # 回滚事务
+        cur.close()
+        raise e
+    cur.close()
+    return True
+
+
+
+
+# 0 插入机票信息函数
+def insert_ticket(flights_id, seat_num, orders_id, psid, ticket_price):
+    global conn
+    if conn is None:
+        conn = conn_mysql()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO Tickets (FlightsID, SeatNum, OrdersID, PSid, TicketPrice) VALUES (%s, %s, %s, %s, %s)",
+            (flights_id, seat_num, orders_id, psid, ticket_price)
+        )
+        conn.commit()
+    except pymysql.IntegrityError:
+        cur.close()
+        return False
+    cur.close()
+    return True
+
+# 0 生成订单编号
+def generate_order_id():
+    return 'AC' + ''.join(random.choices('0123456789', k=10))
+
+# 0 插入订单信息函数
+def insert_order(order_id, pay, status, payment_time, cid):
+    global conn
+    if conn is None:
+        conn = conn_mysql()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO Orders (OrdersID, Pay, Status, PaymentTime, CID) VALUES (%s, %s, %s, %s, %s)",
+            (order_id, pay, status, payment_time, cid)
+        )
+        conn.commit()
+    except pymysql.IntegrityError:
+        cur.close()
+        return False
+    cur.close()
+    return True
 
 # 加密示例
 if __name__ == '__main__':
@@ -157,3 +225,9 @@ if __name__ == "__main__":
         print("User info retrieved:", user_info)
     else:
         print("User not found")
+
+if __name__ == '__main__':
+    # 生成订单编号
+    order_id = generate_order_id()
+    payment_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(order_id, payment_time)

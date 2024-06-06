@@ -7,7 +7,7 @@
 import os
 import sys
 
-from datetime import datetime, timedelta
+import datetime
 
 from datetime import datetime, timedelta
 
@@ -205,6 +205,9 @@ class User_MainWindow(QMainWindow):
         arrival_airport_label = purchase_page.findChild(QLabel, 'ArrivalAirportLabel')
         price_label = purchase_page.findChild(QLabel, 'PriceLabel')
 
+        purchase_button = purchase_page.findChild(QPushButton, 'PurchaseButton')
+        purchase_button.clicked.connect(self.purchase_ticket)
+
         # 假设 self.selected_flight 包含一个元组，依次包含航班编号、出发地点、到达地点、出发机场、到达机场、
         # 出发日期、起飞时间、飞行时间、飞机类型和价格
         (flight_id, departure_place, arrival_place, departure_airport, arrival_airport, departure_date,
@@ -219,6 +222,97 @@ class User_MainWindow(QMainWindow):
         departure_airport_label.setText(f"{departure_airport}")
         arrival_airport_label.setText(f"{arrival_airport}")
         price_label.setText(f"￥ {price}")
+
+
+        self.WritePassengers()
+
+    def WritePassengers(self):
+
+        purchase_page = self.stackedWidget.currentWidget()
+
+        self.selectcomboBox = purchase_page.findChild(QComboBox, 'SelectcomboBox')
+
+        items = ["1人", "2人", "3人"]
+
+        # 检查是否已经有项目添加，如果没有项目才添加
+        if self.selectcomboBox.count() == 0:
+            self.selectcomboBox.addItems(items)
+
+        # 连接信号槽，当选择人数时触发相应的页面切换
+        self.selectcomboBox.currentIndexChanged.connect(self.on_combobox_changed)
+
+    # 槽函数
+    def on_combobox_changed(self):
+        purchase_page = self.stackedWidget.currentWidget()
+
+        # 获取内嵌的 QStackedWidget
+        inner_stacked_widget = purchase_page.findChild(QStackedWidget, 'InnerStackedWidget')
+        if inner_stacked_widget:
+            selected_index = self.selectcomboBox.currentIndex()
+            inner_stacked_widget.setCurrentIndex(selected_index)
+
+    def purchase_ticket(self):
+        purchase_page = self.stackedWidget.currentWidget()
+
+        # 获取内嵌的 QStackedWidget
+        inner_stacked_widget = purchase_page.findChild(QStackedWidget, 'InnerStackedWidget')
+        if not inner_stacked_widget:
+            QMessageBox.warning(self, 'Error', '找不到内嵌的 QStackedWidget')
+            return
+
+        # 获取第一个页面
+        first_page = inner_stacked_widget.widget(0)
+
+        # 获取第一个页面的 QLineEdit 对象
+        name_edit = first_page.findChild(QLineEdit, 'NameLineEdit')
+        sex_edit = first_page.findChild(QLineEdit, 'SexLineEdit')
+        id_edit = first_page.findChild(QLineEdit, 'IDLineEdit')
+        seat_num_edit = first_page.findChild(QLineEdit, 'SeatNumLineEdit')
+
+        # 获取用户输入的数据
+        name = name_edit.text()
+        sex = sex_edit.text()
+        psid = id_edit.text()
+        seat_num = seat_num_edit.text()
+
+        # 检查输入是否为空
+        if not name or not sex or not psid or not seat_num:
+            QMessageBox.warning(self, 'Error', '所有内容都是必填项，请填写完整信息。')
+            return
+
+        # 检查身份证号是否为18位字符串
+        if len(psid) != 18:
+            QMessageBox.warning(self, 'Error', '身份证号必须是18位。')
+            return
+
+        cid = self.user_id  # 假设当前用户ID存储在self.current_user_id
+        flight_id = self.selected_flight[0]  # 假设航班编号是 self.selected_flight 的第一个元素
+        price = self.selected_flight[-1]  # 假设价格是 self.selected_flight 的最后一个元素
+
+        # 生成订单编号
+        order_id = generate_order_id()
+        payment_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        try:
+
+            # 插入订单信息
+            if not insert_order(order_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                raise Exception('插入订单信息失败，请重试。')
+
+            # 插入乘客信息
+            insert_passenger(order_id, psid, name, sex)
+
+            # 插入机票信息
+            if not insert_ticket(flight_id, seat_num, order_id, psid, price):
+                raise Exception('插入机票信息失败，请重试。')
+
+            QMessageBox.information(self, 'Success', '购买成功！')
+
+        except Exception as e:
+            QMessageBox.warning(self, 'Error', str(e))
+
+
+        print(name, sex, psid, seat_num)
 
 
 
