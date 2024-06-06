@@ -79,8 +79,11 @@ CREATE TABLE Flights -- 07 创建航班表
     ArrivalPlace VARCHAR(50) NOT NULL, -- 到达地点
     DepartureAirport VARCHAR(50), -- 起飞机场
     ArrivalAirport VARCHAR(50), -- 到达机场
+    Departuredate DATE, -- 起飞日期 可以为空 机场管理员修改
+    Takeofftime TIME, -- 起飞时间 可以为空 机场管理员修改
     TotalTime TIME, -- 航班总时长
-    PlantType VARCHAR(50) -- 飞机型号
+    PlantType VARCHAR(50), -- 飞机型号
+    Fprice INT -- 航班票价
 );
 
 CREATE TABLE Tickets -- 08 创建机票表

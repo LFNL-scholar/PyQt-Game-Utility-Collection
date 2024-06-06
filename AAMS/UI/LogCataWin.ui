@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
+    <width>1165</width>
     <height>738</height>
    </rect>
   </property>
@@ -15,18 +15,6 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>900</width>
-    <height>738</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>900</width>
-    <height>738</height>
-   </size>
   </property>
   <property name="windowTitle">
    <string>航空联盟管理系统</string>
@@ -37,12 +25,12 @@
      <rect>
       <x>20</x>
       <y>10</y>
-      <width>621</width>
+      <width>941</width>
       <height>651</height>
      </rect>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>7</number>
     </property>
     <widget class="QWidget" name="Home">
      <widget class="QLabel" name="label_5">
@@ -117,7 +105,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>180</x>
@@ -183,7 +171,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>190</x>
@@ -207,7 +195,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QDateEdit" name="date_edit">
+        <widget class="QDateEdit" name="DateEdit">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
@@ -228,12 +216,9 @@
        </item>
       </layout>
      </widget>
+     <zorder>layoutWidget</zorder>
      <zorder>label_9</zorder>
-     <zorder>label_2</zorder>
-     <zorder>label_3</zorder>
-     <zorder>date_edit</zorder>
      <zorder>SearchButton</zorder>
-     <zorder>ArrivalCityComboBox</zorder>
      <zorder>layoutWidget</zorder>
     </widget>
     <widget class="QWidget" name="MyOrders">
@@ -505,6 +490,249 @@
       </property>
      </widget>
     </widget>
+    <widget class="QWidget" name="flight">
+     <widget class="QTableWidget" name="ResultTableWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>40</y>
+        <width>931</width>
+        <height>551</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>931</width>
+        <height>551</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>931</width>
+        <height>551</height>
+       </size>
+      </property>
+      <property name="rowCount">
+       <number>20</number>
+      </property>
+      <property name="columnCount">
+       <number>11</number>
+      </property>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <row/>
+      <column>
+       <property name="text">
+        <string>航班编号</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>出发地点</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>到达地点</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>出发机场</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>到达机场</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>起飞日期</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>起飞时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>飞行时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>机型</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>票价</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>选择</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QPushButton" name="ConfirmButton">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>600</y>
+        <width>81</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>确认购买</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="Pause">
+     <widget class="QLabel" name="FlightInfoLabel">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>450</y>
+        <width>741</width>
+        <height>141</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="Show">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>50</y>
+        <width>51</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>确认订单</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="DepartureTimeLabel">
+      <property name="geometry">
+       <rect>
+        <x>280</x>
+        <y>120</y>
+        <width>101</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="ArrivalTimeLabel">
+      <property name="geometry">
+       <rect>
+        <x>500</x>
+        <y>110</y>
+        <width>101</width>
+        <height>51</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="DepartureAirportLabel">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>210</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="ArrivalAirportLabel">
+      <property name="geometry">
+       <rect>
+        <x>480</x>
+        <y>200</y>
+        <width>101</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="FlightNumberLabel">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>140</y>
+        <width>101</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="PlaneTypeLabel">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>210</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="PriceLabel">
+      <property name="geometry">
+       <rect>
+        <x>740</x>
+        <y>130</y>
+        <width>101</width>
+        <height>101</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
@@ -547,7 +775,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>900</width>
+     <width>1165</width>
      <height>23</height>
     </rect>
    </property>
@@ -652,7 +880,7 @@
       <string>关于我们</string>
      </property>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>40</x>
@@ -690,7 +918,7 @@
       </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>40</x>

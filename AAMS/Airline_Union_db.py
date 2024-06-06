@@ -133,6 +133,16 @@ def get_airports_from_db():
     sql = "SELECT City, Aname FROM Airports"
     return sql_execute(sql)
 
+def search_flights(departure_airport, arrival_airport, selected_date):
+    sql = """
+        SELECT FlightsID, DeparturePlace, ArrivalPlace, DepartureAirport, ArrivalAirport, Departuredate, 
+        Takeofftime, TotalTime, PlantType, Fprice
+        FROM Flights    
+        WHERE DepartureAirport = '{}' AND ArrivalAirport = '{}' AND Departuredate = '{}'
+    """.format(departure_airport, arrival_airport, selected_date)
+
+    return sql_execute(sql)
+
 
 # 加密示例
 if __name__ == '__main__':

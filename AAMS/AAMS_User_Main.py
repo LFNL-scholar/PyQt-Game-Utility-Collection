@@ -7,8 +7,13 @@
 import os
 import sys
 
+from datetime import datetime, timedelta
+
+from datetime import datetime, timedelta
+
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QMainWindow, QDesktopWidget, QPushButton, \
-    QStackedWidget, QLineEdit, QComboBox, QDateEdit
+    QStackedWidget, QLineEdit, QComboBox, QDateEdit, QVBoxLayout, QTableWidget, QTableWidgetItem, QCheckBox, \
+    QHBoxLayout, QLabel
 from PyQt5 import uic
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, pyqtSignal, QRect, QCoreApplication
@@ -23,7 +28,7 @@ from AAMS.UI import images_rc
 # 全局变量
 
 
-class User_MainWindow(QMainWindow):  # 步骤1: 登录成功后的窗口类
+class User_MainWindow(QMainWindow):
     def __init__(self, user_id):
         super().__init__()
 
@@ -76,28 +81,163 @@ class User_MainWindow(QMainWindow):  # 步骤1: 登录成功后的窗口类
 
         self.departure_city_combobox = search_page.findChild(QComboBox, 'DepartureCityComboBox')
         self.arrival_city_combobox = search_page.findChild(QComboBox, 'ArrivalCityComboBox')
+        self.date_edit = search_page.findChild(QDateEdit, 'DateEdit')
         self.populate_airports()
 
         search_button = search_page.findChild(QPushButton, 'SearchButton')
-        search_button.clicked.connect(self.search_flights)
+        search_button.clicked.connect(self.match_flights)
 
+    # 从数据库中获取机场数据
     def populate_airports(self):
         airports = get_airports_from_db()
-        self.departure_city_combobox.clear()
-        self.arrival_city_combobox.clear()
+        if airports:
+            self.departure_city_combobox.clear()
+            self.arrival_city_combobox.clear()
 
-        for city, airport in airports:
-            self.departure_city_combobox.addItem(f"{city} - {airport}")
-            self.arrival_city_combobox.addItem(f"{city} - {airport}")
+            for city, airport in airports:
+                self.departure_city_combobox.addItem(f"{city} - {airport}")
+                self.arrival_city_combobox.addItem(f"{city} - {airport}")
+        else:
+            QMessageBox.warning(self, 'Error', '无法从数据库获取机场信息。')
 
-    def search_flights(self):
+    # 匹配符合条件的航班数据
+    def match_flights(self):
         departure_city_airport = self.departure_city_combobox.currentText().split(' - ')
         arrival_city_airport = self.arrival_city_combobox.currentText().split(' - ')
-        departure_city = departure_city_airport[0]
-        arrival_city = arrival_city_airport[0]
-        departure_date = self.findChild(QDateEdit, 'DateEdit').date().toString(Qt.ISODate)
-        # 添加搜索逻辑的代码
+        departure_airport = departure_city_airport[1]
+        arrival_airport = arrival_city_airport[1]
+        selected_date = self.date_edit.date().toString("yyyy-MM-dd")
 
+        try:
+            flights_data = search_flights(departure_airport, arrival_airport, selected_date)
+        except Exception as e:
+            QMessageBox.information(self, 'NO', '匹配错误')
+
+        if flights_data:
+            self.show_flights_result(flights_data)
+        else:
+            QMessageBox.information(self, 'No Flights', '未找到符合条件的航班。')
+
+    # 跳转到航班搜索结果界面
+    def show_flights_result(self, flights_data):
+        # 获取结果页部件
+        self.stackedWidget.setCurrentIndex(6)
+        result_page = self.stackedWidget.currentWidget()
+
+        # 获取表格控件
+        table = result_page.findChild(QTableWidget, 'ResultTableWidget')
+        if not table:
+            QMessageBox.warning(self, 'Error', '未找到结果表格。')
+            return
+
+        table.setRowCount(len(flights_data))
+        table.setColumnCount(11)
+
+        # 填充表格数据
+        for row_num, flight in enumerate(flights_data):
+
+            # 填充航班数据
+            for col_num, data in enumerate(flight):
+                item = QTableWidgetItem(str(data))
+                item.setTextAlignment(Qt.AlignCenter)
+                table.setItem(row_num, col_num, item)
+
+            # 添加选择控件
+            select_checkbox = QCheckBox()
+            select_checkbox.stateChanged.connect(
+                lambda state, f = flight: self.handle_checkbox_state_change(state, f))
+            select_checkbox_widget = QWidget()
+            layout = QHBoxLayout(select_checkbox_widget)
+            layout.addWidget(select_checkbox)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            select_checkbox_widget.setLayout(layout)
+            table.setCellWidget(row_num, 10, select_checkbox_widget)  # 选择控件放在最后一列
+
+        # 设置特定列的宽度
+        table.setColumnWidth(0, 70)  # 航班编号
+        table.setColumnWidth(1, 70)  # 出发地点
+        table.setColumnWidth(2, 70)  # 到达地点
+        table.setColumnWidth(3, 100)  # 出发机场
+        table.setColumnWidth(4, 100)  # 到达机场
+        table.setColumnWidth(5, 80)  # 起飞日期
+        table.setColumnWidth(6, 80)  # 起飞时间
+        table.setColumnWidth(7, 80)  # 飞行时间
+        table.setColumnWidth(8, 80)  # 机型
+        table.setColumnWidth(9, 80)  # 票价
+        table.setColumnWidth(10, 80)  # 选择
+
+
+        # 更新表格数据后，确保页面显示正确
+        self.stackedWidget.setCurrentIndex(6)
+
+        # 获取确认按钮并连接其点击事件
+        confirm_button = result_page.findChild(QPushButton, 'ConfirmButton')
+        confirm_button.clicked.connect(self.confirm_selection)
+
+    # 处理复选框的状态变化
+    def handle_checkbox_state_change(self, state, flight):
+        if state == Qt.Checked:
+            self.selected_flight = flight
+        else:
+            self.selected_flight = None
+
+    # 确认按钮的点击事件处理
+    def confirm_selection(self):
+        if not self.selected_flight:
+            QMessageBox.warning(self, 'Error', '请选择一个航班。')
+            return
+
+        self.ToPurchase()
+
+    # 跳转到购买页面
+    def ToPurchase(self):
+        self.stackedWidget.setCurrentIndex(7)
+        purchase_page = self.stackedWidget.currentWidget()
+
+        # 获取各个 QLabel 对象
+        flight_number_label = purchase_page.findChild(QLabel, 'FlightNumberLabel')
+        plane_type_label = purchase_page.findChild(QLabel, 'PlaneTypeLabel')
+        departure_time_label = purchase_page.findChild(QLabel, 'DepartureTimeLabel')
+        arrival_time_label = purchase_page.findChild(QLabel, 'ArrivalTimeLabel')
+        departure_airport_label = purchase_page.findChild(QLabel, 'DepartureAirportLabel')
+        arrival_airport_label = purchase_page.findChild(QLabel, 'ArrivalAirportLabel')
+        price_label = purchase_page.findChild(QLabel, 'PriceLabel')
+
+        # 假设 self.selected_flight 包含一个元组，依次包含航班编号、出发地点、到达地点、出发机场、到达机场、
+        # 出发日期、起飞时间、飞行时间、飞机类型和价格
+        (flight_id, departure_place, arrival_place, departure_airport, arrival_airport, departure_date,
+         takeoff_time, total_time, plane_type, price) = self.selected_flight
+
+        try:
+
+            # 打印调试信息
+            print(f"Departure date: {departure_date}")
+            print(f"Takeoff time: {takeoff_time}")
+
+            # 确保日期和时间的格式正确
+            if not isinstance(departure_date, str):
+                departure_date = departure_date.strftime("%Y-%m-%d")
+            if not isinstance(takeoff_time, str):
+                takeoff_time = takeoff_time.strftime("%H:%M")
+
+            # 计算到达时间
+            departure_datetime = datetime.strptime(f"{departure_date} {takeoff_time}", "%Y-%m-%d %H:%M")
+            total_minutes = int(total_time)  # 确保 total_time 是一个表示分钟数的整数
+            arrival_datetime = departure_datetime + timedelta(minutes = total_minutes)
+            arrival_time = arrival_datetime.strftime("%Y-%m-%d %H:%M")
+
+        except ValueError as e:
+            QMessageBox.warning(self, 'Error', f"日期或时间格式错误: {e}")
+
+        # 设置各个 QLabel 的文本
+        flight_number_label.setText(f"{flight_id}")
+        plane_type_label.setText(f"{plane_type}")
+        departure_time_label.setText(f"{takeoff_time}")
+        arrival_time_label.setText(f"{total_time}")
+        departure_airport_label.setText(f"{departure_airport}")
+        arrival_airport_label.setText(f"{arrival_airport}")
+        price_label.setText(f"￥{price}")
 
     # 我的订单界面
     def ToOrders(self):
