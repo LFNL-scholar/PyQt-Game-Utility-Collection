@@ -206,7 +206,6 @@ class User_MainWindow(QMainWindow):
         price_label = purchase_page.findChild(QLabel, 'PriceLabel')
 
         purchase_button = purchase_page.findChild(QPushButton, 'PurchaseButton')
-        purchase_button.clicked.connect(self.purchase_ticket)
 
         # 假设 self.selected_flight 包含一个元组，依次包含航班编号、出发地点、到达地点、出发机场、到达机场、
         # 出发日期、起飞时间、飞行时间、飞机类型和价格
@@ -225,6 +224,8 @@ class User_MainWindow(QMainWindow):
 
 
         self.WritePassengers()
+
+        purchase_button.clicked.connect(self.purchase_ticket)
 
     def WritePassengers(self):
 
