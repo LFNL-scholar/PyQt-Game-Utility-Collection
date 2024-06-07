@@ -207,7 +207,6 @@ class User_MainWindow(QMainWindow):
 
         purchase_button = purchase_page.findChild(QPushButton, 'PurchaseButton')
 
-
         # 假设 self.selected_flight 包含一个元组，依次包含航班编号、出发地点、到达地点、出发机场、到达机场、
         # 出发日期、起飞时间、飞行时间、飞机类型和价格
         (flight_id, departure_place, arrival_place, departure_airport, arrival_airport, departure_date,
@@ -223,10 +222,10 @@ class User_MainWindow(QMainWindow):
         arrival_airport_label.setText(f"{arrival_airport}")
         price_label.setText(f"￥ {price}")
 
+
         self.WritePassengers()
 
         purchase_button.clicked.connect(self.purchase_ticket)
-
 
     def WritePassengers(self):
 
@@ -262,7 +261,12 @@ class User_MainWindow(QMainWindow):
             QMessageBox.warning(self, 'Error', '找不到内嵌的 QStackedWidget')
             return
 
-        selected_index = purchase_page.select
+        # 获取内嵌的 QStackedWidget
+        inner_stacked_widget = purchase_page.findChild(QStackedWidget, 'InnerStackedWidget')
+        if inner_stacked_widget:
+            selected_index = self.selectcomboBox.currentIndex()
+            inner_stacked_widget.setCurrentIndex(selected_index)
+
 
         if selected_index == 0:
             # 获取第一个页面
@@ -422,7 +426,7 @@ class User_MainWindow(QMainWindow):
 
             # 检查输入是否为空
             if not name_1 or not sex_1 or not psid_1 or not seat_num_1 \
-                    or not name_2 or not sex_2 or not psid_2 or not seat_num_2\
+                    or not name_2 or not sex_2 or not psid_2 or not seat_num_2 \
                     or not name_3 or not sex_3 or not psid_3 or not seat_num_3:
                 QMessageBox.warning(self, 'Error', '所有内容都是必填项，请填写完整信息。')
                 return

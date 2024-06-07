@@ -261,59 +261,214 @@ class User_MainWindow(QMainWindow):
             QMessageBox.warning(self, 'Error', '找不到内嵌的 QStackedWidget')
             return
 
-        # 获取第一个页面
-        first_page = inner_stacked_widget.widget(0)
-
-        # 获取第一个页面的 QLineEdit 对象
-        name_edit = first_page.findChild(QLineEdit, 'NameLineEdit')
-        sex_edit = first_page.findChild(QLineEdit, 'SexLineEdit')
-        id_edit = first_page.findChild(QLineEdit, 'IDLineEdit')
-        seat_num_edit = first_page.findChild(QLineEdit, 'SeatNumLineEdit')
-
-        # 获取用户输入的数据
-        name = name_edit.text()
-        sex = sex_edit.text()
-        psid = id_edit.text()
-        seat_num = seat_num_edit.text()
-
-        # 检查输入是否为空
-        if not name or not sex or not psid or not seat_num:
-            QMessageBox.warning(self, 'Error', '所有内容都是必填项，请填写完整信息。')
-            return
-
-        # 检查身份证号是否为18位字符串
-        if len(psid) != 18:
-            QMessageBox.warning(self, 'Error', '身份证号必须是18位。')
-            return
-
-        cid = self.user_id  # 假设当前用户ID存储在self.current_user_id
-        flight_id = self.selected_flight[0]  # 假设航班编号是 self.selected_flight 的第一个元素
-        price = self.selected_flight[-1]  # 假设价格是 self.selected_flight 的最后一个元素
-
-        # 生成订单编号
-        order_id = generate_order_id()
-        payment_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        try:
-
-            # 插入订单信息
-            if not insert_order(order_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
-                raise Exception('插入订单信息失败，请重试。')
-
-            # 插入乘客信息
-            insert_passenger(order_id, psid, name, sex)
-
-            # 插入机票信息
-            if not insert_ticket(flight_id, seat_num, order_id, psid, price):
-                raise Exception('插入机票信息失败，请重试。')
-
-            QMessageBox.information(self, 'Success', '购买成功！')
-
-        except Exception as e:
-            QMessageBox.warning(self, 'Error', str(e))
+        # 获取内嵌的 QStackedWidget
+        inner_stacked_widget = purchase_page.findChild(QStackedWidget, 'InnerStackedWidget')
+        if inner_stacked_widget:
+            selected_index = self.selectcomboBox.currentIndex()
+            inner_stacked_widget.setCurrentIndex(selected_index)
 
 
-        print(name, sex, psid, seat_num)
+        if selected_index == 0:
+            # 获取第一个页面
+            first_page = inner_stacked_widget.widget(0)
+
+            # 获取第一个页面的 QLineEdit 对象
+            name_edit = first_page.findChild(QLineEdit, 'NameLineEdit')
+            sex_edit = first_page.findChild(QLineEdit, 'SexLineEdit')
+            id_edit = first_page.findChild(QLineEdit, 'IDLineEdit')
+            seat_num_edit = first_page.findChild(QLineEdit, 'SeatNumLineEdit')
+
+            # 获取用户输入的数据
+            name = name_edit.text()
+            sex = sex_edit.text()
+            psid = id_edit.text()
+            seat_num = seat_num_edit.text()
+
+            # 检查输入是否为空
+            if not name or not sex or not psid or not seat_num:
+                QMessageBox.warning(self, 'Error', '所有内容都是必填项，请填写完整信息。')
+                return
+
+            # 检查身份证号是否为18位字符串
+            if len(psid) != 18:
+                QMessageBox.warning(self, 'Error', '身份证号必须是18位。')
+                return
+
+            cid = self.user_id  # 假设当前用户ID存储在self.current_user_id
+            flight_id = self.selected_flight[0]  # 假设航班编号是 self.selected_flight 的第一个元素
+            price = self.selected_flight[-1]  # 假设价格是 self.selected_flight 的最后一个元素
+
+            # 生成订单编号
+            order_id = generate_order_id()
+            payment_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            try:
+
+                # 插入订单信息
+                if not insert_order(order_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                    raise Exception('插入订单信息失败，请重试。')
+
+                # 插入乘客信息
+                insert_passenger(order_id, psid, name, sex)
+
+                # 插入机票信息
+                if not insert_ticket(flight_id, seat_num, order_id, psid, price):
+                    raise Exception('插入机票信息失败，请重试。')
+
+                QMessageBox.information(self, 'Success', '购买成功！')
+
+            except Exception as e:
+                QMessageBox.warning(self, 'Error', str(e))
+
+
+        elif selected_index == 1:
+            # 获取第二个页面
+            second_page = inner_stacked_widget.widget(1)
+
+            # 获取第二个页面的 QLineEdit 对象
+            name_edit_1 = second_page.findChild(QLineEdit, 'NameLineEdit_1')
+            sex_edit_1 = second_page.findChild(QLineEdit, 'SexLineEdit_1')
+            id_edit_1 = second_page.findChild(QLineEdit, 'IDLineEdit_1')
+            seat_num_edit_1 = second_page.findChild(QLineEdit, 'SeatNumLineEdit_1')
+
+            name_edit_2 = second_page.findChild(QLineEdit, 'NameLineEdit_2')
+            sex_edit_2 = second_page.findChild(QLineEdit, 'SexLineEdit_2')
+            id_edit_2 = second_page.findChild(QLineEdit, 'IDLineEdit_2')
+            seat_num_edit_2 = second_page.findChild(QLineEdit, 'SeatNumLineEdit_2')
+
+            # 获取用户输入的数据
+            name_1 = name_edit_1.text()
+            sex_1 = sex_edit_1.text()
+            psid_1 = id_edit_1.text()
+            seat_num_1 = seat_num_edit_1.text()
+
+            name_2 = name_edit_2.text()
+            sex_2 = sex_edit_2.text()
+            psid_2 = id_edit_2.text()
+            seat_num_2 = seat_num_edit_2.text()
+
+            # 检查输入是否为空
+            if not name_1 or not sex_1 or not psid_1 or not seat_num_1 \
+                    or not name_2 or not sex_2 or not psid_2 or not seat_num_2:
+                QMessageBox.warning(self, 'Error', '所有内容都是必填项，请填写完整信息。')
+                return
+
+            # 检查身份证号是否为18位字符串
+            if len(psid_1 and psid_2) != 18:
+                QMessageBox.warning(self, 'Error', '身份证号必须是18位。')
+                return
+
+            cid = self.user_id  # 假设当前用户ID存储在self.current_user_id
+            flight_id = self.selected_flight[0]  # 假设航班编号是 self.selected_flight 的第一个元素
+            price = self.selected_flight[-1]  # 假设价格是 self.selected_flight 的最后一个元素
+
+            # 生成订单编号
+            order_id = generate_order_id()
+            payment_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            try:
+
+                # 插入订单信息
+                if not insert_order(order_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                    raise Exception('插入订单信息失败，请重试。')
+
+                # 插入乘客信息
+                insert_passenger(order_id, psid_1, name_1, sex_1)
+                insert_passenger(order_id, psid_2, name_2, sex_2)
+
+                # 插入机票信息
+                if not insert_ticket(flight_id, seat_num_1, order_id, psid_1, price):
+                    raise Exception('插入第一位乘客机票信息失败，请重试。')
+
+                if not insert_ticket(flight_id, seat_num_2, order_id, psid_2, price):
+                    raise Exception('插入第二位乘客机票信息失败，请重试。')
+
+                QMessageBox.information(self, 'Success', '购买成功！')
+
+            except Exception as e:
+                QMessageBox.warning(self, 'Error', str(e))
+
+        elif selected_index == 2:
+            # 获取第三个页面
+            third_page = inner_stacked_widget.widget(2)
+
+            # 获取第三个页面的 QLineEdit 对象
+            name_edit_1 = third_page.findChild(QLineEdit, 'NameLineEdit_3')
+            sex_edit_1 = third_page.findChild(QLineEdit, 'SexLineEdit_3')
+            id_edit_1 = third_page.findChild(QLineEdit, 'IDLineEdit_3')
+            seat_num_edit_1 = third_page.findChild(QLineEdit, 'SeatNumLineEdit_3')
+
+            name_edit_2 = third_page.findChild(QLineEdit, 'NameLineEdit_4')
+            sex_edit_2 = third_page.findChild(QLineEdit, 'SexLineEdit_4')
+            id_edit_2 = third_page.findChild(QLineEdit, 'IDLineEdit_4')
+            seat_num_edit_2 = third_page.findChild(QLineEdit, 'SeatNumLineEdit_4')
+
+            name_edit_3 = third_page.findChild(QLineEdit, 'NameLineEdit_5')
+            sex_edit_3 = third_page.findChild(QLineEdit, 'SexLineEdit_5')
+            id_edit_3 = third_page.findChild(QLineEdit, 'IDLineEdit_5')
+            seat_num_edit_3 = third_page.findChild(QLineEdit, 'SeatNumLineEdit_5')
+
+            # 获取用户输入的数据
+            name_1 = name_edit_1.text()
+            sex_1 = sex_edit_1.text()
+            psid_1 = id_edit_1.text()
+            seat_num_1 = seat_num_edit_1.text()
+
+            name_2 = name_edit_2.text()
+            sex_2 = sex_edit_2.text()
+            psid_2 = id_edit_2.text()
+            seat_num_2 = seat_num_edit_2.text()
+
+            name_3 = name_edit_3.text()
+            sex_3 = sex_edit_3.text()
+            psid_3 = id_edit_3.text()
+            seat_num_3 = seat_num_edit_3.text()
+
+            # 检查输入是否为空
+            if not name_1 or not sex_1 or not psid_1 or not seat_num_1 \
+                    or not name_2 or not sex_2 or not psid_2 or not seat_num_2 \
+                    or not name_3 or not sex_3 or not psid_3 or not seat_num_3:
+                QMessageBox.warning(self, 'Error', '所有内容都是必填项，请填写完整信息。')
+                return
+
+            # 检查身份证号是否为18位字符串
+            if len(psid_1 and psid_2 and psid_3) != 18:
+                QMessageBox.warning(self, 'Error', '身份证号必须是18位。')
+                return
+
+            cid = self.user_id  # 假设当前用户ID存储在self.current_user_id
+            flight_id = self.selected_flight[0]  # 假设航班编号是 self.selected_flight 的第一个元素
+            price = self.selected_flight[-1]  # 假设价格是 self.selected_flight 的最后一个元素
+
+            # 生成订单编号
+            order_id = generate_order_id()
+            payment_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            try:
+
+                # 插入订单信息
+                if not insert_order(order_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                    raise Exception('插入订单信息失败，请重试。')
+
+                # 插入乘客信息
+                insert_passenger(order_id, psid_1, name_1, sex_1)
+                insert_passenger(order_id, psid_2, name_2, sex_2)
+                insert_passenger(order_id, psid_3, name_3, sex_3)
+
+                # 插入机票信息
+                if not insert_ticket(flight_id, seat_num_1, order_id, psid_1, price):
+                    raise Exception('插入第一位乘客机票信息失败，请重试。')
+
+                if not insert_ticket(flight_id, seat_num_2, order_id, psid_2, price):
+                    raise Exception('插入第二位乘客机票信息失败，请重试。')
+
+                if not insert_ticket(flight_id, seat_num_3, order_id, psid_3, price):
+                    raise Exception('插入第三位乘客机票信息失败，请重试。')
+
+                QMessageBox.information(self, 'Success', '购买成功！')
+
+            except Exception as e:
+                QMessageBox.warning(self, 'Error', str(e))
 
 
 
