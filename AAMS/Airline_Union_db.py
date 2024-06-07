@@ -221,6 +221,31 @@ def search_orders(cid):
     return sql_execute(sql)
 
 
+def search_sid(cid):
+    sql = """
+        SELECT Csid FROM Customers   
+        WHERE CID = '{}'
+    """.format(cid)
+
+    result = sql_execute(sql)
+    if result:
+        return result[0][0]  # 返回查询结果的第一个行的第一个列的值，即身份证号码
+    else:
+        return None  # 如果没有找到记录，返回None或者适合的默认值
+
+
+# 根据身份证号查询机票的函数
+def search_tickets_by_sid(csid):
+    sql = """
+        SELECT *
+        FROM Tickets
+        WHERE PSid = '{}'
+    """.format(csid)
+
+    return sql_execute(sql)
+
+
+
 def delete_order(order_id):
     try:
         # 开始事务
@@ -256,14 +281,21 @@ def delete_order(order_id):
         raise RuntimeError(f"Error deleting order {order_id}: {str(e)}")
 
 
-# 根据用户 ID 获取身份证号码
-def search_sid(cid):
+# 根据身份证号查询机票和航班信息
+def search_info_by_sid(csid):
     sql = """
-        SELECT sid, CID FROM Customers   
-        WHERE CID = '{}'
-    """.format(cid)
-
+        SELECT t.FlightsID, f.DeparturePlace, f.ArrivalPlace, f.DepartureAirport, 
+               f.ArrivalAirport, f.Departuredate, 
+               TIME_FORMAT(f.Takeofftime, '%H:%i:%s') AS Takeofftime, 
+               TIME_FORMAT(ADDTIME(f.Takeofftime, f.TotalTime), '%H:%i:%s') AS TotalTime, 
+               t.SeatNum, f.PlantType
+        FROM Tickets t
+        JOIN Flights f ON t.FlightsID = f.FlightsID
+        WHERE t.PSid = '{}'
+    """.format(csid)
     return sql_execute(sql)
+
+
 
 
 

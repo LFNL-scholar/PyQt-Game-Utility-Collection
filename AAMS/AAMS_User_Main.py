@@ -10,6 +10,7 @@ import sys
 import datetime
 
 from datetime import datetime, timedelta
+from wsgiref import headers
 
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QMainWindow, QDesktopWidget, QPushButton, \
     QStackedWidget, QLineEdit, QComboBox, QDateEdit, QVBoxLayout, QTableWidget, QTableWidgetItem, QCheckBox, \
@@ -20,6 +21,7 @@ from PyQt5.QtCore import Qt, pyqtSignal, QRect, QCoreApplication
 
 from SQLs import *
 from Airline_Union_db import *
+
 import Config as C
 
 # 导入界面所需图片
@@ -579,19 +581,150 @@ class User_MainWindow(QMainWindow):
     # 出行服务界面
     def ToTravel(self):
 
-        self.stackedWidget.setCurrentIndex(3)
         cid = self.user_id
 
-        # 获取用户身份证号
-        csid = self.search_sid(cid)
-        print(csid)
+        # 调用搜索身份证号的函数
+        csid = search_sid(cid)
+        # print(csid)  # 打印用户身份证号，用于调试
 
-        # 检查用户身份证在机票数据库表中是否存在
-        # ticket_data = self.search_tickets(identity_card)
+        # 根据 csid 查询机票和航班信息
+        tickets_info = search_info_by_sid(csid)
+
+        if not tickets_info:
+            # 如果没有查询到机票数据，则跳转到指定页面
+            self.stackedWidget.setCurrentIndex(9)  # 显示无机票的页面
+            return  # 返回，避免继续执行下面的代码
 
 
-        # 切换到出行服务页面
+        # 切换到出行服务页面（假设stackedWidget是你的页面切换控件，并设置了对应的页面索引）
         self.stackedWidget.setCurrentIndex(3)
+        tickets_page = self.stackedWidget.currentWidget()
+
+        # 获取表格控件
+        table = tickets_page.findChild(QTableWidget, 'TicketsTableWidget')
+        if not table:
+            QMessageBox.warning(self, 'Error', '未找到结果表格。')
+            return
+
+        # 清空表格
+        table.setRowCount(0)
+
+        table.setRowCount(len(tickets_info))
+        table.setColumnCount(11)
+
+        def on_checkbox_clicked():
+            for i in range(table.rowCount()):
+                widget = table.cellWidget(i, 10)
+                if widget:
+                    checkbox = widget.findChild(QCheckBox)
+                    if checkbox != self.sender() and self.sender().isChecked():
+                        checkbox.setChecked(False)
+
+        # 填充表格数据
+        for row_idx, ticket in enumerate(tickets_info):
+            table.insertRow(row_idx)
+            for col_idx, value in enumerate(ticket):
+                item = QTableWidgetItem(str(value))
+                item.setTextAlignment(Qt.AlignCenter)
+                table.setItem(row_idx, col_idx, item)
+
+            # 添加选择控件
+            select_checkbox = QCheckBox()
+            select_checkbox.setChecked(False)  # 初始化为未选中状态
+            select_checkbox.clicked.connect(on_checkbox_clicked)
+
+            # 将复选框放置在一个居中的小部件中
+            select_checkbox_widget = QWidget()
+            checkbox_layout = QHBoxLayout(select_checkbox_widget)
+            checkbox_layout.addWidget(select_checkbox)
+            checkbox_layout.setAlignment(Qt.AlignCenter)
+            checkbox_layout.setContentsMargins(0, 0, 0, 0)
+            select_checkbox_widget.setLayout(checkbox_layout)
+
+            # 将小部件设置为表格的单元格中
+            table.setCellWidget(row_idx, 10, select_checkbox_widget)  # 假设最后一列的索引是10
+
+        # 设置特定列的宽度
+        table.setColumnWidth(0, 70)  # 航班编号
+        table.setColumnWidth(1, 60)  # 出发地点
+        table.setColumnWidth(2, 60)  # 到达地点
+        table.setColumnWidth(3, 100)  # 出发机场
+        table.setColumnWidth(4, 100)  # 到达机场
+        table.setColumnWidth(5, 100)  # 起飞日期
+        table.setColumnWidth(6, 80)  # 起飞时间
+        table.setColumnWidth(7, 80)  # 到达时间
+        table.setColumnWidth(8, 50)  # 座位号
+        table.setColumnWidth(9, 90)  # 机型
+        table.setColumnWidth(10, 70)  # 选择
+
+        # 更新表格数据后，确保页面显示正确
+        self.stackedWidget.setCurrentIndex(3)
+
+        show_button = tickets_page.findChild(QPushButton, 'ShowButton')
+        show_button.clicked.connect(self.ShowTicket)
+
+    def ShowTicket(self):
+        try:
+            show_page = self.stackedWidget.currentWidget()
+
+            # 获取表格控件
+            table = show_page.findChild(QTableWidget, 'TicketsTableWidget')
+            if not table:
+                raise RuntimeError('未找到结果表格。')
+
+            selected_row = None
+            for row_idx in range(table.rowCount()):
+                widget = table.cellWidget(row_idx, 10)
+                if widget:
+                    checkbox = widget.findChild(QCheckBox)
+                    if checkbox and checkbox.isChecked():
+                        selected_row = row_idx
+                        break
+
+            if selected_row is None:
+                QMessageBox.warning(self, 'Error', '请先选择一行。')
+                return
+
+            # 获取各个 QLabel 对象
+            flight_number_label = show_page.findChild(QLabel, 'FlightNumberLabel_2')
+            plane_type_label = show_page.findChild(QLabel, 'PlaneTypeLabel_2')
+            departure_date_label = show_page.findChild(QLabel, 'DepartureDateLabel_2')
+            departure_time_label = show_page.findChild(QLabel, 'DepartureTimeLabel_2')
+            arrival_time_label = show_page.findChild(QLabel, 'ArrivalTimeLabel_2')
+            departure_airport_label = show_page.findChild(QLabel, 'DepartureAirportLabel_2')
+            arrival_airport_label = show_page.findChild(QLabel, 'ArrivalAirportLabel_2')
+            name_label = show_page.findChild(QLabel, 'NameLabel')
+
+            if not (flight_number_label and plane_type_label and departure_date_label and
+                    departure_time_label and arrival_time_label and departure_airport_label and
+                    arrival_airport_label and name_label):
+                raise RuntimeError('未找到所有标签。')
+
+            # 获取选中的行数据
+            flight_number = table.item(selected_row, 0).text()
+            plane_type = table.item(selected_row, 9).text()
+            departure_date = table.item(selected_row, 5).text()
+            departure_time = table.item(selected_row, 6).text()
+            arrival_time = table.item(selected_row, 7).text()
+            departure_airport = table.item(selected_row, 3).text()
+            arrival_airport = table.item(selected_row, 4).text()
+            name = "Your Name"  # Replace with actual passenger name retrieval if needed
+
+            # 填充 QLabel 数据
+            flight_number_label.setText(flight_number)
+            plane_type_label.setText(plane_type)
+            departure_date_label.setText(departure_date)
+            departure_time_label.setText(departure_time)
+            arrival_time_label.setText(arrival_time)
+            departure_airport_label.setText(departure_airport)
+            arrival_airport_label.setText(arrival_airport)
+            name_label.setText(name)
+
+        except Exception as e:
+            QMessageBox.warning(self, 'Error', f'发生错误：{str(e)}')
+            return
+
+
 
     # 修改资料界面
     def ToModify(self):
