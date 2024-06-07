@@ -11,6 +11,8 @@ import hashlib
 import random
 import datetime
 
+import traceback  # 导入用于输出详细异常信息的模块
+
 import Config as C
 
 global conn
@@ -148,9 +150,6 @@ def search_flights(departure_airport, arrival_airport, selected_date):
     return sql_execute(sql)
 
 # 0 插入乘客信息函数
-# 0 插入乘客信息函数
-# 插入乘客信息
-# 插入乘客信息
 def insert_passenger(order_id, psid, pname, psex):
     global conn
     if conn is None:
@@ -211,6 +210,63 @@ def insert_order(order_id, pay, status, payment_time, cid):
         return False
     cur.close()
     return True
+
+# 搜索订单数据
+def search_orders(cid):
+    sql = """
+        SELECT OrdersID, Pay, Status, PaymentTime, CID FROM Orders    
+        WHERE CID = '{}'
+    """.format(cid)
+
+    return sql_execute(sql)
+
+
+def delete_order(order_id):
+    try:
+        # 开始事务
+        sql_begin_transaction = "START TRANSACTION"
+        sql_execute(sql_begin_transaction)
+
+        # 删除 Tickets 表中的数据
+        sql_delete_tickets = "DELETE FROM Tickets WHERE OrdersID = '{}'".format(order_id)
+        sql_execute(sql_delete_tickets)
+        print(f"Deleted tickets for order {order_id}")
+
+        # 删除 Passengers 表中的数据
+        sql_delete_passengers = "DELETE FROM Passengers WHERE Order_ID = '{}'".format(order_id)
+        sql_execute(sql_delete_passengers)
+        print(f"Deleted passengers for order {order_id}")
+
+        # 删除 Orders 表中的订单数据
+        sql_delete_orders = "DELETE FROM Orders WHERE OrdersID = '{}'".format(order_id)
+        sql_execute(sql_delete_orders)
+        print(f"Deleted order {order_id}")
+
+        # 提交事务
+        sql_commit_transaction = "COMMIT"
+        sql_execute(sql_commit_transaction)
+
+    except Exception as e:
+        # 回滚事务
+        sql_rollback_transaction = "ROLLBACK"
+        sql_execute(sql_rollback_transaction)
+
+        # 输出异常信息
+        traceback.print_exc()
+        raise RuntimeError(f"Error deleting order {order_id}: {str(e)}")
+
+
+# 根据用户 ID 获取身份证号码
+def search_sid(cid):
+    sql = """
+        SELECT sid, CID FROM Customers   
+        WHERE CID = '{}'
+    """.format(cid)
+
+    return sql_execute(sql)
+
+
+
 
 # 加密示例
 if __name__ == '__main__':

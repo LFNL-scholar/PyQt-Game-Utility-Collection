@@ -369,7 +369,7 @@ class User_MainWindow(QMainWindow):
             cid = self.user_id  # 假设当前用户ID存储在self.current_user_id
             flight_id = self.selected_flight[0]  # 假设航班编号是 self.selected_flight 的第一个元素
             price = self.selected_flight[-1]  # 假设价格是 self.selected_flight 的最后一个元素
-
+            order_price = self.selected_flight[-1] * 2
             # 生成订单编号
             order_id = generate_order_id()
             payment_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -377,7 +377,7 @@ class User_MainWindow(QMainWindow):
             try:
 
                 # 插入订单信息
-                if not insert_order(order_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                if not insert_order(order_id, order_price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
                     raise Exception('插入订单信息失败，请重试。')
 
                 # 插入乘客信息
@@ -447,6 +447,7 @@ class User_MainWindow(QMainWindow):
             cid = self.user_id  # 假设当前用户ID存储在self.current_user_id
             flight_id = self.selected_flight[0]  # 假设航班编号是 self.selected_flight 的第一个元素
             price = self.selected_flight[-1]  # 假设价格是 self.selected_flight 的最后一个元素
+            order_price = self.selected_flight[-1] * 3
 
             # 生成订单编号
             order_id = generate_order_id()
@@ -455,7 +456,7 @@ class User_MainWindow(QMainWindow):
             try:
 
                 # 插入订单信息
-                if not insert_order(order_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                if not insert_order(order_id, order_price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
                     raise Exception('插入订单信息失败，请重试。')
 
                 # 插入乘客信息
@@ -482,11 +483,113 @@ class User_MainWindow(QMainWindow):
 
     # 我的订单界面
     def ToOrders(self):
+
+        cid = self.user_id
+
+        # 从数据库获取订单信息
+        orders_data = search_orders(cid)
+        # print(f"Orders data for CID {cid}: {orders_data}")  # 打印订单数据进行调试
+
+        if not orders_data:  # 如果没有订单数据
+            self.stackedWidget.setCurrentIndex(8)  # 跳转到第8个页面 无订单页面的显示
+            # QMessageBox.warning(self, 'No Orders', '没有找到您的订单。')
+            return
+
+
         # 切换到我的订单页面
         self.stackedWidget.setCurrentIndex(2)
+        myorders_page = self.stackedWidget.currentWidget()
+
+        # 获取表格控件
+        table = myorders_page.findChild(QTableWidget, 'OrdersTableWidget')
+        if not table:
+            QMessageBox.warning(self, 'Error', '未找到结果表格。')
+            return
+
+
+        table.setRowCount(len(orders_data))
+        table.setColumnCount(5)
+
+        self.checkboxes = []  # 存储复选框状态的列表
+
+        columns = ['OrdersID', 'Pay', 'Status', 'PaymentTime']
+
+        # 填充表格数据
+        for row_num, order in enumerate(orders_data):
+            for col_num, col_name in enumerate(columns):
+                value = order[col_num]
+                if col_name == 'Status':
+                    value = '是' if value == 'Y' else '否'
+                elif col_name == 'PaymentTime':
+                    value = value.strftime("%Y-%m-%d %H:%M:%S")
+                else:
+                    value = str(value)
+
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignCenter)
+                table.setItem(row_num, col_num, item)
+
+            # 添加选择控件并居中
+            select_checkbox = QCheckBox()
+            self.checkboxes.append((select_checkbox, order[0]))  # 将复选框和订单ID存储在一起
+            select_checkbox_widget = QWidget()
+            layout = QHBoxLayout(select_checkbox_widget)
+            layout.addWidget(select_checkbox)
+            layout.setAlignment(Qt.AlignCenter)
+            layout.setContentsMargins(0, 0, 0, 0)
+            select_checkbox_widget.setLayout(layout)
+            table.setCellWidget(row_num, 4, select_checkbox_widget)
+
+        # 设置特定列的宽度
+        table.setColumnWidth(0, 150)  # 订单编号
+        table.setColumnWidth(1, 100)  # 支付金额
+        table.setColumnWidth(2, 80)  # 是否支付
+        table.setColumnWidth(3, 200)  # 支付时间
+        table.setColumnWidth(4, 80)  # 选择
+
+        # 更新表格数据后，确保页面显示正确
+        self.stackedWidget.setCurrentIndex(2)
+
+        # 获取确认按钮并连接其点击事件
+        delete_button = myorders_page.findChild(QPushButton, 'DeleteButton')
+        delete_button.clicked.connect(self.delete_info)
+
+    def delete_info(self):
+        selected_orders = [order_id for checkbox, order_id in self.checkboxes if checkbox.isChecked()]
+
+        if not selected_orders:
+            QMessageBox.warning(self, 'Error', '请选择要删除的订单。')
+            raise ValueError('No orders selected for deletion.')  # 抛出异常
+
+        # 从数据库中删除选中的订单
+        try:
+            for order_id in selected_orders:
+                delete_order(order_id)
+
+            # 刷新订单页面
+            self.ToOrders()
+
+            print('Delete button clicked')  # 打印调试信息
+
+        except Exception as e:
+            QMessageBox.critical(self, 'Error', f'删除订单时出现错误：{str(e)}')
+            raise e  # 继续抛出异常供调试使用
+
 
     # 出行服务界面
     def ToTravel(self):
+
+        self.stackedWidget.setCurrentIndex(3)
+        cid = self.user_id
+
+        # 获取用户身份证号
+        csid = self.search_sid(cid)
+        print(csid)
+
+        # 检查用户身份证在机票数据库表中是否存在
+        # ticket_data = self.search_tickets(identity_card)
+
+
         # 切换到出行服务页面
         self.stackedWidget.setCurrentIndex(3)
 

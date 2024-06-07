@@ -60,7 +60,7 @@
      </size>
     </property>
     <property name="currentIndex">
-     <number>7</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="Home">
      <widget class="QLabel" name="label_5">
@@ -265,20 +265,131 @@
        <string>我的订单</string>
       </property>
      </widget>
+     <widget class="QTableWidget" name="OrdersTableWidget">
+      <property name="geometry">
+       <rect>
+        <x>60</x>
+        <y>90</y>
+        <width>631</width>
+        <height>331</height>
+       </rect>
+      </property>
+      <property name="rowCount">
+       <number>0</number>
+      </property>
+      <column>
+       <property name="text">
+        <string>订单编号</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>支付金额</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>是否支付</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>支付时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>选择</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QPushButton" name="DeleteButton">
+      <property name="geometry">
+       <rect>
+        <x>180</x>
+        <y>500</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>删除订单</string>
+      </property>
+     </widget>
     </widget>
     <widget class="QWidget" name="Travel">
      <widget class="QLabel" name="label_7">
       <property name="geometry">
        <rect>
-        <x>100</x>
-        <y>80</y>
-        <width>54</width>
-        <height>12</height>
+        <x>40</x>
+        <y>50</y>
+        <width>71</width>
+        <height>41</height>
        </rect>
       </property>
       <property name="text">
-       <string>TextLabel</string>
+       <string>我的机票</string>
       </property>
+     </widget>
+     <widget class="QTableWidget" name="tableWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>100</y>
+        <width>931</width>
+        <height>192</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>航班编号</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>出发城市</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>到达城市</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>出发机场</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>到达机场</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>起飞日期</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>起飞时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>到达时间</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>机型</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>选择</string>
+       </property>
+      </column>
      </widget>
     </widget>
     <widget class="QWidget" name="Modify">
@@ -581,12 +692,12 @@
       </column>
       <column>
        <property name="text">
-        <string>出发地点</string>
+        <string>出发城市</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>到达地点</string>
+        <string>到达城市</string>
        </property>
       </column>
       <column>
@@ -1763,6 +1874,21 @@
         </widget>
        </item>
       </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="None">
+     <widget class="QLabel" name="label_45">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>160</y>
+        <width>171</width>
+        <height>91</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>无订单</string>
+      </property>
      </widget>
     </widget>
    </widget>
