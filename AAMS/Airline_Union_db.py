@@ -194,15 +194,16 @@ def generate_order_id():
     return 'AC' + ''.join(random.choices('0123456789', k=10))
 
 # 0 插入订单信息函数
-def insert_order(order_id, pay, status, payment_time, cid):
+def insert_order(order_id, flightID,  pay, status, payment_time, cid):
     global conn
     if conn is None:
         conn = conn_mysql()
     cur = conn.cursor()
     try:
         cur.execute(
-            "INSERT INTO Orders (OrdersID, Pay, Status, PaymentTime, CID) VALUES (%s, %s, %s, %s, %s)",
-            (order_id, pay, status, payment_time, cid)
+            "INSERT INTO Orders (OrdersID, FlightsID, Pay, Status, PaymentTime, CID) "
+            "VALUES (%s, %s, %s, %s, %s, %s)",
+            (order_id, flightID, pay, status, payment_time, cid)
         )
         conn.commit()
     except pymysql.IntegrityError:
@@ -214,7 +215,7 @@ def insert_order(order_id, pay, status, payment_time, cid):
 # 搜索订单数据
 def search_orders(cid):
     sql = """
-        SELECT OrdersID, Pay, Status, PaymentTime, CID FROM Orders    
+        SELECT OrdersID, FlightsID, Pay, Status, PaymentTime FROM Orders    
         WHERE CID = '{}'
     """.format(cid)
 
@@ -279,6 +280,29 @@ def delete_order(order_id):
         # 输出异常信息
         traceback.print_exc()
         raise RuntimeError(f"Error deleting order {order_id}: {str(e)}")
+
+
+def get_realname_from_database(cid):
+    try:
+        # 构造查询语句
+        sql = """
+            SELECT Realname FROM Customers
+            WHERE CID = '{}'
+        """.format(cid)
+
+        # 执行查询并获取结果
+        result = sql_execute(sql)
+
+        # 检查是否有结果
+        if result:
+            return result[0][0]  # 返回查询结果的第一个行的第一个列的值，即真实姓名
+        else:
+            return "Unknown"  # 如果没有找到记录，返回适当的默认值，例如 "Unknown"
+
+    except Exception as e:
+        # 输出异常信息（可选）
+        print(f"Error retrieving realname for CID {cid}: {str(e)}")
+        return "Unknown"  # 返回默认值或者适当的错误处理方式
 
 
 # 根据身份证号查询机票和航班信息

@@ -6,7 +6,7 @@
 """
 import sys
 
-from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QMainWindow, QDesktopWidget, QDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QMainWindow, QDesktopWidget, QDialog, QPushButton
 from PyQt5 import uic, QtCore
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, pyqtSignal, QRect
@@ -34,6 +34,7 @@ class RegisterPage(QDialog):
         self.setWindowIcon(QIcon('Images/Icon.jpg'))
 
         self.RegisterButton.clicked.connect(self.Register)
+
 
     def Register(self):
         # 获取信息
@@ -76,11 +77,15 @@ class LoginPage(QMainWindow):
 
     def initUI(self):
 
-        uic.loadUi('UI/Login.ui', self)
+        uic.loadUi('UI/Login_M.ui', self)
         self.setWindowIcon(QIcon('Images/Icon.jpg'))
 
-        # self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # 消除周边的框框
-        # self.setAttribute(QtCore.Qt.WA_TranslucentBackground)  # 设置阴影
+        # 退出按钮
+        self.exit_btn.setToolTip('点击退出')  # 设置提示信息
+        self.exit_btn.clicked.connect(self.close)  # 点击按钮关闭窗口
+
+        self.setWindowFlag(QtCore.Qt.FramelessWindowHint)  # 消除周边的框框
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)  # 设置阴影
 
         # 设置跳转
         # self.LoginButton.connect(lambda: self.stackedWidget_2.setCurrentIndex((0)))  # 登录界面

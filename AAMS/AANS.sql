@@ -69,6 +69,7 @@ CREATE TABLE Passengers -- 创建乘客表
 CREATE TABLE Orders -- 06 创建订单表
 (
     OrdersID VARCHAR(20) PRIMARY KEY, -- 订单编号
+    FlightsID VARCHAR(20), -- 航班编号
     Pay DECIMAL(10, 2) NOT NULL, -- 支付金额
     Status CHAR(1) NOT NULL, -- 是否支付
     PaymentTime DATETIME , -- 支付时间

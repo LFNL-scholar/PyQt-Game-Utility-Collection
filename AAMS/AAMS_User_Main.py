@@ -315,7 +315,7 @@ class User_MainWindow(QMainWindow):
             try:
 
                 # 插入订单信息
-                if not insert_order(order_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                if not insert_order(order_id,flight_id, price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
                     raise Exception('插入订单信息失败，请重试。')
 
                 # 插入乘客信息
@@ -379,7 +379,7 @@ class User_MainWindow(QMainWindow):
             try:
 
                 # 插入订单信息
-                if not insert_order(order_id, order_price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                if not insert_order(order_id,flight_id, order_price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
                     raise Exception('插入订单信息失败，请重试。')
 
                 # 插入乘客信息
@@ -458,7 +458,7 @@ class User_MainWindow(QMainWindow):
             try:
 
                 # 插入订单信息
-                if not insert_order(order_id, order_price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
+                if not insert_order(order_id, flight_id, order_price, 'Y', payment_time, cid):  # 'Y'表示已支付状态
                     raise Exception('插入订单信息失败，请重试。')
 
                 # 插入乘客信息
@@ -510,11 +510,11 @@ class User_MainWindow(QMainWindow):
 
 
         table.setRowCount(len(orders_data))
-        table.setColumnCount(5)
+        table.setColumnCount(6)
 
         self.checkboxes = []  # 存储复选框状态的列表
 
-        columns = ['OrdersID', 'Pay', 'Status', 'PaymentTime']
+        columns = ['OrdersID', 'FlightID', 'Pay', 'Status', 'PaymentTime']
 
         # 填充表格数据
         for row_num, order in enumerate(orders_data):
@@ -531,6 +531,8 @@ class User_MainWindow(QMainWindow):
                 item.setTextAlignment(Qt.AlignCenter)
                 table.setItem(row_num, col_num, item)
 
+
+
             # 添加选择控件并居中
             select_checkbox = QCheckBox()
             self.checkboxes.append((select_checkbox, order[0]))  # 将复选框和订单ID存储在一起
@@ -540,14 +542,15 @@ class User_MainWindow(QMainWindow):
             layout.setAlignment(Qt.AlignCenter)
             layout.setContentsMargins(0, 0, 0, 0)
             select_checkbox_widget.setLayout(layout)
-            table.setCellWidget(row_num, 4, select_checkbox_widget)
+            table.setCellWidget(row_num, 5, select_checkbox_widget)
 
         # 设置特定列的宽度
         table.setColumnWidth(0, 150)  # 订单编号
-        table.setColumnWidth(1, 100)  # 支付金额
-        table.setColumnWidth(2, 80)  # 是否支付
-        table.setColumnWidth(3, 200)  # 支付时间
-        table.setColumnWidth(4, 80)  # 选择
+        table.setColumnWidth(1, 100)  # 航班编号
+        table.setColumnWidth(2, 100)  # 支付金额
+        table.setColumnWidth(3, 80)  # 是否支付
+        table.setColumnWidth(4, 200)  # 支付时间
+        table.setColumnWidth(5, 96)  # 选择
 
         # 更新表格数据后，确保页面显示正确
         self.stackedWidget.setCurrentIndex(2)
@@ -590,6 +593,9 @@ class User_MainWindow(QMainWindow):
         # 根据 csid 查询机票和航班信息
         tickets_info = search_info_by_sid(csid)
 
+        # print(tickets_info)
+        # print(len(tickets_info))
+
         if not tickets_info:
             # 如果没有查询到机票数据，则跳转到指定页面
             self.stackedWidget.setCurrentIndex(9)  # 显示无机票的页面
@@ -609,7 +615,6 @@ class User_MainWindow(QMainWindow):
         # 清空表格
         table.setRowCount(0)
 
-        table.setRowCount(len(tickets_info))
         table.setColumnCount(11)
 
         def on_checkbox_clicked():
@@ -619,6 +624,9 @@ class User_MainWindow(QMainWindow):
                     checkbox = widget.findChild(QCheckBox)
                     if checkbox != self.sender() and self.sender().isChecked():
                         checkbox.setChecked(False)
+
+        # 设置表格行数为数据项的数量
+        # table.setRowCount(len(tickets_info))
 
         # 填充表格数据
         for row_idx, ticket in enumerate(tickets_info):
@@ -661,6 +669,10 @@ class User_MainWindow(QMainWindow):
         self.stackedWidget.setCurrentIndex(3)
 
         show_button = tickets_page.findChild(QPushButton, 'ShowButton')
+
+        # 调用 ShowTicket 方法显示第一条数据或者选中的数据
+        self.ShowTicket()
+
         show_button.clicked.connect(self.ShowTicket)
 
     def ShowTicket(self):
@@ -681,9 +693,22 @@ class User_MainWindow(QMainWindow):
                         selected_row = row_idx
                         break
 
+            # 如果没有选中的行，默认选择第一行
             if selected_row is None:
-                QMessageBox.warning(self, 'Error', '请先选择一行。')
-                return
+                selected_row = 0
+
+            # 获取选中的行数据
+            flight_number = table.item(selected_row, 0).text()
+            plane_type = table.item(selected_row, 9).text()
+            departure_date = table.item(selected_row, 5).text()
+            departure_time = table.item(selected_row, 6).text()
+            arrival_time = table.item(selected_row, 7).text()
+            departure_airport = table.item(selected_row, 3).text()
+            arrival_airport = table.item(selected_row, 4).text()
+
+            # 获取当前用户的真实姓名
+            cid = self.user_id
+            realname = get_realname_from_database(cid)
 
             # 获取各个 QLabel 对象
             flight_number_label = show_page.findChild(QLabel, 'FlightNumberLabel_2')
@@ -700,15 +725,6 @@ class User_MainWindow(QMainWindow):
                     arrival_airport_label and name_label):
                 raise RuntimeError('未找到所有标签。')
 
-            # 获取选中的行数据
-            flight_number = table.item(selected_row, 0).text()
-            plane_type = table.item(selected_row, 9).text()
-            departure_date = table.item(selected_row, 5).text()
-            departure_time = table.item(selected_row, 6).text()
-            arrival_time = table.item(selected_row, 7).text()
-            departure_airport = table.item(selected_row, 3).text()
-            arrival_airport = table.item(selected_row, 4).text()
-            name = "Your Name"  # Replace with actual passenger name retrieval if needed
 
             # 填充 QLabel 数据
             flight_number_label.setText(flight_number)
@@ -718,12 +734,11 @@ class User_MainWindow(QMainWindow):
             arrival_time_label.setText(arrival_time)
             departure_airport_label.setText(departure_airport)
             arrival_airport_label.setText(arrival_airport)
-            name_label.setText(name)
+            name_label.setText(realname)
 
         except Exception as e:
             QMessageBox.warning(self, 'Error', f'发生错误：{str(e)}')
             return
-
 
 
     # 修改资料界面
