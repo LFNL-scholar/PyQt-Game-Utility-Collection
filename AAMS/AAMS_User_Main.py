@@ -133,6 +133,8 @@ class User_MainWindow(QMainWindow):
         table.setRowCount(len(flights_data))
         table.setColumnCount(11)
 
+        self.selected_flight = None  # 初始化selected_flight为None
+
         # 填充表格数据
         for row_num, flight in enumerate(flights_data):
 
@@ -145,7 +147,7 @@ class User_MainWindow(QMainWindow):
             # 添加选择控件
             select_checkbox = QCheckBox()
             select_checkbox.stateChanged.connect(
-                lambda state, f = flight: self.handle_checkbox_state_change(state, f))
+                lambda state, row = row_num, f = flight: self.handle_checkbox_state_change(state, row, f))
             select_checkbox_widget = QWidget()
             layout = QHBoxLayout(select_checkbox_widget)
             layout.addWidget(select_checkbox)
@@ -176,15 +178,22 @@ class User_MainWindow(QMainWindow):
         confirm_button.clicked.connect(self.confirm_selection)
 
     # 处理复选框的状态变化
-    def handle_checkbox_state_change(self, state, flight):
+    def handle_checkbox_state_change(self, state, row, flight):
+        table = self.stackedWidget.currentWidget().findChild(QTableWidget, 'ResultTableWidget')
         if state == Qt.Checked:
+            for i in range(table.rowCount()):
+                if i != row:
+                    checkbox_widget = table.cellWidget(i, 10)
+                    if checkbox_widget:  # 确保找到的控件存在
+                        checkbox = checkbox_widget.findChild(QCheckBox)
+                        checkbox.setChecked(False)
             self.selected_flight = flight
-        else:
+        elif state == Qt.Unchecked and self.selected_flight == flight:
             self.selected_flight = None
 
     # 确认按钮的点击事件处理
     def confirm_selection(self):
-        if not self.selected_flight:
+        if self.selected_flight is None:
             QMessageBox.warning(self, 'Error', '请选择一个航班。')
             return
 
@@ -261,8 +270,7 @@ class User_MainWindow(QMainWindow):
             QMessageBox.warning(self, 'Error', '找不到内嵌的 QStackedWidget')
             return
 
-        # 获取内嵌的 QStackedWidget
-        inner_stacked_widget = purchase_page.findChild(QStackedWidget, 'InnerStackedWidget')
+        # 获取内嵌的 selected_index 页面
         if inner_stacked_widget:
             selected_index = self.selectcomboBox.currentIndex()
             inner_stacked_widget.setCurrentIndex(selected_index)
