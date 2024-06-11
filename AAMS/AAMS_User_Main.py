@@ -112,6 +112,7 @@ class User_MainWindow(QMainWindow):
 
         try:
             flights_data = search_flights(departure_airport, arrival_airport, selected_date)
+            # print(flights_data)
         except Exception as e:
             QMessageBox.information(self, 'NO', '匹配错误')
 

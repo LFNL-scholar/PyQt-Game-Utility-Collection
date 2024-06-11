@@ -109,6 +109,7 @@ def get_user_info(cid):
         return result[0]  # 假设CID是唯一的，只会返回一行结果
     return None
 
+
 def update_user_info(user_info):
     try:
         # 构建更新用户信息的 SQL 语句
@@ -135,6 +136,79 @@ def update_user_info(user_info):
         return False
 
 
+def get_airline_info(fmid):
+    try:
+        sql = f"SELECT Fname, Fsex, FMID FROM FlightsManagers WHERE FMID = '{fmid}'"
+        result = sql_execute(sql)
+        if result:
+            return result[0]  # 假设FMID是唯一的，只会返回一行结果
+        return None
+    except Exception as e:
+        print("Error in get_airline_info:", e)
+        return None
+
+
+def update_airline_info(user_info):
+    try:
+        # 构建更新用户信息的 SQL 语句
+        sql = f"""
+            UPDATE FlightsManagers
+            SET Fname = '{user_info['Fname']}', 
+                Fsex = '{user_info['Fsex']}'
+        """
+
+        # 如果新密码不为空，则更新密码
+        if user_info['NewPassword']:
+            sql += f", Fpassword = '{md5(user_info['NewPassword'])}'"
+
+        sql += f" WHERE FMID = '{user_info['FMID']}'"
+
+        # 执行 SQL 语句
+        sql_execute(sql)
+        conn.commit()  # 提交事务
+        return True
+    except Exception as e:
+        print("Error in update_airline_info:", e)
+        conn.rollback()  # 发生错误时回滚事务
+        return False
+
+
+def update_airport_manager_info(user_info):
+    try:
+        # 构建更新用户信息的 SQL 语句
+        sql = f"""
+            UPDATE AirportsManagers
+            SET AMname = '{user_info['AMname']}', 
+                AMsex = '{user_info['AMsex']}'
+        """
+
+        # 如果新密码不为空，则更新密码
+        if user_info['NewPassword']:
+            sql += f", AMpassword = '{md5(user_info['NewPassword'])}'"
+
+        sql += f" WHERE AMID = '{user_info['AMID']}'"
+
+        # 执行 SQL 语句
+        sql_execute(sql)
+        conn.commit()  # 提交事务
+        return True
+    except Exception as e:
+        print("Error in update_airport_manager_info:", e)
+        conn.rollback()  # 发生错误时回滚事务
+        return False
+
+def get_airport_manager_info(amid):
+    try:
+        sql = f"SELECT AMname, AMsex, AMID FROM AirportsManagers WHERE AMID = '{amid}'"
+        result = sql_execute(sql)
+        if result:
+            return result[0]  # 假设AMID是唯一的，只会返回一行结果
+        return None
+    except Exception as e:
+        print("Error in get_airport_manager_info:", e)
+        return None
+
+
 def get_airports_from_db():
     sql = "SELECT City, Aname FROM Airports"
     return sql_execute(sql)
@@ -148,6 +222,34 @@ def search_flights(departure_airport, arrival_airport, selected_date):
     """.format(departure_airport, arrival_airport, selected_date)
 
     return sql_execute(sql)
+
+# 根据机场名搜索对应的航班
+def search_Airport_flights(departure_airport):
+    sql = """
+        SELECT FlightsID, DeparturePlace, ArrivalPlace, DepartureAirport, ArrivalAirport, Departuredate, 
+        Takeofftime, TotalTime, PlantType
+        FROM Flights    
+        WHERE DepartureAirport = '{}'
+    """.format(departure_airport)
+
+    return sql_execute(sql)
+
+
+# 根据机场管理员账号查询机场名的函数
+def search_aname_by_amid(cid):
+    sql = """
+        SELECT Aname
+        FROM AirportsManagers
+        WHERE AMID = '{}'
+    """.format(cid)
+    result = sql_execute(sql)
+    if result:
+        return result[0][0]
+    else:
+        return None
+
+
+
 
 # 0 插入乘客信息函数
 def insert_passenger(order_id, psid, pname, psex):
@@ -320,6 +422,44 @@ def search_info_by_sid(csid):
     return sql_execute(sql)
 
 
+def publish_flight(flight_number, departure_city, arrival_city, departure_airport, arrival_airport, plane_type, price):
+    global conn
+    if conn is None:
+        conn = conn_mysql()
+    cur = conn.cursor()
+    try:
+        cur.execute(
+            "INSERT INTO Flights (FlightsID, DeparturePlace, ArrivalPlace, DepartureAirport, "
+            "ArrivalAirport, PlantType, Fprice) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            (flight_number, departure_city, arrival_city, departure_airport, arrival_airport, plane_type, price)
+        )
+        conn.commit()
+        cur.close()
+        return True
+    except pymysql.IntegrityError as ie:
+        conn.rollback()
+        cur.close()
+        print(f"IntegrityError: {ie}")
+        return False
+    except Exception as e:
+        conn.rollback()
+        cur.close()
+        print(f"An error occurred: {e}")
+        return False
+
+
+def update_flight_details(flight_id, flight_date, departure_time, flight_time):
+
+    try:
+        sql = f"""
+        UPDATE Flights
+        SET Departuredate = '{flight_date}', Takeofftime = '{departure_time}', TotalTime = '{flight_time}'
+        WHERE FlightsID = '{flight_id}'
+        """
+        sql_execute(sql)
+        conn.commit()  # 提交更改
+    except Exception as e:
+        print(f"更新航班详情时出错: {e}")
 
 
 

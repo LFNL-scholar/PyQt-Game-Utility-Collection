@@ -120,7 +120,7 @@ class LoginPage(QMainWindow):
 
             if validate_flight_manager(account, password):
 
-                self.airline_mainWindow = Airline_MainWindow()  # 步骤4: 实例化新窗口
+                self.airline_mainWindow = Airline_MainWindow(user_id = account)  # 步骤4: 实例化新窗口
                 self.airline_mainWindow.show()  # 步骤5: 显示新窗口
                 self.close()  # 关闭登录窗口
                 # 登录成功
@@ -133,7 +133,7 @@ class LoginPage(QMainWindow):
 
             if validate_Airport_manager(account, password):
 
-                self.airport_mainWindow = Airport_MainWindow()  # 步骤4: 实例化新窗口
+                self.airport_mainWindow = Airport_MainWindow(user_id = account)  # 步骤4: 实例化新窗口
                 self.airport_mainWindow.show()  # 步骤5: 显示新窗口
                 self.close()  # 关闭登录窗口
                 # 登录成功

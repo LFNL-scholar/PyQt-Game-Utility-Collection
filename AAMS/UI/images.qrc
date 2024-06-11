@@ -5,10 +5,13 @@
 <!--        多少个文件写多少行-->
         <file>Images/login.png</file>
         <file>Images/Home_page.png</file>
+        <file>Images/Home_Airline.png</file>
+            <file>Images/Home_Airport.png</file>
         <file>Images/plane_bg.png</file>
         <file>Images/About_us.png</file>
         <file>Images/Modify.png</file>
         <file>Images/Select_F.png</file>
         <file>Images/Orders.png</file>
+        <file>Images/Publish.png</file>
     </qresource>
 </RCC>

@@ -91,7 +91,7 @@ CREATE TABLE Flights -- 07 创建航班表
     Fprice INT -- 航班票价
 );
 
-CREATE TABLE Tickets -- 创建机票表
+CREATE TABLE Tickets -- 08 创建机票表
 (
     FlightsID VARCHAR(20), -- 航班编号
     SeatNum VARCHAR(10), -- 座位号
