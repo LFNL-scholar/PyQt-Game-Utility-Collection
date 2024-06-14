@@ -55,7 +55,7 @@ CREATE TABLE AirportsManagers -- 04 创建机场管理员表
     FOREIGN KEY (Aname) REFERENCES Airports(Aname)
 );
 
-CREATE TABLE Passengers -- 创建乘客表
+CREATE TABLE Passengers -- 05 创建乘客表
 (
     Order_ID VARCHAR(20),
     PSid CHAR(18) NOT NULL, -- 乘客身份证号
