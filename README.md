@@ -1,4 +1,4 @@
-# PyQt Game & Utility Collection
+# PyQt-Game-Utility-Collection
 
 ## 项目简介
 PyQt Game & Utility Collection 是一个基于 PyQt 开发的游戏和多媒体应用合集，包含多个子项目，如游戏、播放器、字典等，旨在提供丰富的功能体验。
@@ -6,7 +6,7 @@ PyQt Game & Utility Collection 是一个基于 PyQt 开发的游戏和多媒体�
 ## 目录结构
 ```
 .idea/                # 开发环境相关配置
-AAMS/                 # AAMS 相关项目
+AAMS/                 # 航空管理系统 
 Miass教学/            # 教学相关内容
 水印/                 # 水印功能模块
 白月黑羽教学/        # 其他教学内容
